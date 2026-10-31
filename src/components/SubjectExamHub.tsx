@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grade11ExamQuestion, ErrorBookItem } from '../types';
 import {
   Sparkles,
@@ -23,9 +23,8 @@ import {
   Play,
   Pause,
   ListChecks,
-  Check,
-  ChevronRight
 } from 'lucide-react';
+import { MathQuestionDiagram } from './MathQuestionDiagram';
 
 interface SubjectExamHubProps {
   subject: 'chinese' | 'math' | 'english';
@@ -66,7 +65,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
   const [isTimeUp, setIsTimeUp] = useState<boolean>(false);
 
-  // Hint visibility state (for 10-min difficult questions)
+  // Hint visibility state (for all questions)
   const [showHint, setShowHint] = useState<boolean>(false);
 
   // Browse mode filters
@@ -180,13 +179,39 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
     }
   };
 
-  // Restart whole 15 questions
+  // Reset current question (重來此題)
+  const handleResetCurrentQuestion = (questionId?: string) => {
+    const targetQ = questionId ? questions.find((q) => q.id === questionId) : currentQ;
+    if (!targetQ) return;
+
+    setUserSelections((prev) => {
+      const next = { ...prev };
+      delete next[targetQ.id];
+      return next;
+    });
+    setTimeSpentRecord((prev) => {
+      const next = { ...prev };
+      delete next[targetQ.id];
+      return next;
+    });
+
+    if (targetQ.id === currentQ?.id) {
+      const qSeconds = (targetQ.allocatedMinutes || (subject === 'math' ? 5 : 3)) * 60;
+      setTimeLeft(qSeconds);
+      setIsTimeUp(false);
+      setIsTimerRunning(true);
+      setShowHint(false);
+    }
+  };
+
+  // Restart whole 15 questions (重來全卷)
   const handleRestartExam = () => {
     setUserSelections({});
     setTimeSpentRecord({});
     setCurrentIndex(0);
     setIsExamCompleted(false);
     setIsTimeUp(false);
+    setShowHint(false);
     const firstQ = questions[0];
     const firstQSecs = (firstQ?.allocatedMinutes || (subject === 'math' ? 5 : 3)) * 60;
     setTimeLeft(firstQSecs);
@@ -253,6 +278,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
           examSource: '高二學測名師精準素養命題',
           difficulty: '進階應用',
           allocatedMinutes: subject === 'math' ? 7 : 3,
+          hint: item.examTrick ? `💡 解題提示：${item.examTrick}` : '💡 解題提示：注意題幹核心關鍵詞與限制條件，由已知逆推求解。',
           question: item.question,
           options: item.options,
           correctIndex: item.correctIndex,
@@ -308,37 +334,46 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
               </span>
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              {subject === 'math'
-                ? '數學每題 5~10 分鐘（難題 10 分鐘附名師思維提示）· 答完上一題進入下一題'
-                : `${subjectTitle}每題 3 分鐘計時 · 一題一題出現 · 即時答案判定與名師全解析`}
+              每題皆附名師解題提示 · 答完即看解析 · 支援單題或全卷隨時重來
             </div>
           </div>
         </div>
 
-        {/* Mode Toggle Buttons */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
+        {/* Mode Toggle Buttons & Whole Exam Reset */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setViewMode('timedExam')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-              viewMode === 'timedExam'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
+            onClick={handleRestartExam}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+            title="清空所有題目作答紀錄，重新開始測驗"
           >
-            <Timer className="w-3.5 h-3.5" />
-            <span>15題逐題計時實戰</span>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>重置全卷</span>
           </button>
-          <button
-            onClick={() => setViewMode('browseAll')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-              viewMode === 'browseAll'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>15題全覽清單</span>
-          </button>
+
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <button
+              onClick={() => setViewMode('timedExam')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'timedExam'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Timer className="w-3.5 h-3.5" />
+              <span>15題逐題計時實戰</span>
+            </button>
+            <button
+              onClick={() => setViewMode('browseAll')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'browseAll'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>15題全覽清單</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -397,7 +432,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 <button
                   onClick={handleAddAllMistakesToErrorBook}
-                  className="px-5 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold text-xs flex items-center gap-2 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors shadow-xs"
+                  className="px-5 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold text-xs flex items-center gap-2 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors shadow-xs cursor-pointer"
                 >
                   <BookmarkPlus className="w-4 h-4" />
                   <span>一鍵將所有錯題收錄至錯題本</span>
@@ -405,15 +440,15 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
 
                 <button
                   onClick={handleRestartExam}
-                  className={`px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs transition-colors ${themeStyles.btnActive}`}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs transition-colors cursor-pointer ${themeStyles.btnActive}`}
                 >
                   <RefreshCw className="w-4 h-4" />
-                  <span>重新挑戰本輪 15 題</span>
+                  <span>重新挑戰本輪 15 題 (全卷重來)</span>
                 </button>
 
                 <button
                   onClick={() => setViewMode('browseAll')}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
                   檢視全部題目與詳細解析
                 </button>
@@ -476,9 +511,22 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                         {/* Collapsed Detailed View */}
                         {isExpanded && (
                           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs space-y-3">
+                            {/* Question Hint in review */}
+                            {q.hint && (
+                              <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
+                                <span className="font-bold">提示：</span> {q.hint}
+                              </div>
+                            )}
+
                             <div className="font-serif-tc whitespace-pre-line text-slate-800 dark:text-slate-200 font-medium">
                               {q.question}
                             </div>
+
+                            {/* Math Diagram in review */}
+                            {q.subject === 'math' && (
+                              <MathQuestionDiagram questionId={q.id} />
+                            )}
+
                             <div className="text-emerald-700 dark:text-emerald-300 font-bold">
                               {q.fullSolution.answerNote}
                             </div>
@@ -530,7 +578,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                     {!isCurrentAnswered && (
                       <button
                         onClick={() => setIsTimerRunning(!isTimerRunning)}
-                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                         title={isTimerRunning ? '暫停計時' : '繼續計時'}
                       >
                         {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -560,7 +608,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                       <button
                         key={q.id}
                         onClick={() => setCurrentIndex(idx)}
-                        className={`h-7 rounded-md text-[11px] font-mono flex items-center justify-center transition-all ${dotClass}`}
+                        className={`h-7 rounded-md text-[11px] font-mono flex items-center justify-center transition-all cursor-pointer ${dotClass}`}
                         title={`第 ${idx + 1} 題：${q.unit} (${q.allocatedMinutes}分鐘)`}
                       >
                         {idx + 1}
@@ -593,7 +641,17 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Retry Current Question Action Button in Header */}
+                    <button
+                      onClick={() => handleResetCurrentQuestion()}
+                      className="text-xs text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 flex items-center gap-1 transition-colors font-medium px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      title="重置本題作答與計時"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>重來此題</span>
+                    </button>
+
                     <button
                       onClick={() =>
                         onAddErrorItem({
@@ -611,7 +669,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                           note: currentQ.speedTrick || currentQ.commonTraps,
                         })
                       }
-                      className="text-xs text-slate-400 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium"
+                      className="text-xs text-slate-400 hover:text-rose-600 flex items-center gap-1.5 transition-colors font-medium px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                       title="收錄進錯題本"
                     >
                       <BookmarkPlus className="w-4 h-4" />
@@ -620,28 +678,28 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                   </div>
                 </div>
 
-                {/* 10-Minute Math Question Hint Banner (難題十分鐘給提示) */}
+                {/* Hint Banner (每一題皆有名師解題提示) */}
                 {currentQ.hint && (
-                  <div className="p-4 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/40 space-y-2">
+                  <div className="p-4 rounded-xl border border-amber-300 dark:border-amber-800/80 bg-amber-50/80 dark:bg-amber-950/40 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                         <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
                           {currentQ.allocatedMinutes && currentQ.allocatedMinutes >= 10
-                            ? '💡 難題10分鐘專屬思維提示（若遇到瓶頸請點開）：'
-                            : '💡 名師關鍵提示：'}
+                            ? '💡 10分鐘難題思維提示（若遇到瓶頸請點開）：'
+                            : '💡 名師解題思維提示：'}
                         </span>
                       </div>
                       <button
                         onClick={() => setShowHint(!showHint)}
-                        className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 underline transition-colors"
+                        className="px-2.5 py-1 text-xs font-semibold rounded-md border border-amber-300 dark:border-amber-700 bg-amber-100/70 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800/80 transition-colors cursor-pointer"
                       >
                         {showHint ? '收起提示' : '查看提示 (不扣分)'}
                       </button>
                     </div>
 
                     {showHint && (
-                      <div className="text-xs text-amber-900 dark:text-amber-200 font-serif-tc leading-relaxed pl-6 border-l-2 border-amber-400 dark:border-amber-600 pt-1">
+                      <div className="text-xs text-amber-900 dark:text-amber-200 font-serif-tc leading-relaxed pl-6 border-l-2 border-amber-400 dark:border-amber-600 pt-1 animate-fade-in">
                         {currentQ.hint}
                       </div>
                     )}
@@ -650,9 +708,17 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
 
                 {/* Time Out Alert Banner */}
                 {isTimeUp && isCurrentAnswered && currentChoice === -1 && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                    <span>⏰ 時間已到！請詳閱下方名師推導步驟與常犯地雷，加強解題速度與觀念熟練度。</span>
+                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-300 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>⏰ 時間已到！已自動為您展示本題步驟推導與避坑分析。</span>
+                    </div>
+                    <button
+                      onClick={() => handleResetCurrentQuestion()}
+                      className="px-2.5 py-1 rounded-md bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-100 font-bold hover:bg-rose-300 transition-colors shrink-0"
+                    >
+                      重新計時重試
+                    </button>
                   </div>
                 )}
 
@@ -660,6 +726,11 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                 <div className="text-base font-medium text-slate-900 dark:text-white leading-relaxed font-serif-tc whitespace-pre-line">
                   {currentQ.question}
                 </div>
+
+                {/* Math Problem Illustration Diagram (例圖) */}
+                {currentQ.subject === 'math' && (
+                  <MathQuestionDiagram questionId={currentQ.id} />
+                )}
 
                 {/* 4 Interactive Options */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
@@ -787,44 +858,58 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                   </div>
                 )}
 
-                {/* Bottom Navigation: Proceed to Next Question (一題一題出現，答完上一題後出現下一題) */}
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
-                  <button
-                    onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                    disabled={currentIndex === 0}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>上一題</span>
-                  </button>
+                {/* Bottom Navigation: Proceed to Next Question & Retry Question Buttons */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                      disabled={currentIndex === 0}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>上一題</span>
+                    </button>
 
-                  <div className="text-xs text-slate-400">
-                    {isCurrentAnswered ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                        ✓ 本題作答已完成
-                      </span>
-                    ) : (
-                      <span>請點選選項作答，答完即解鎖全解析與下一題</span>
-                    )}
+                    {/* Retry Button - Directly Accessible on Bottom Bar */}
+                    <button
+                      onClick={() => handleResetCurrentQuestion()}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-400 flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="重來本題：清空答案並重新計時"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>重來本題</span>
+                    </button>
                   </div>
 
-                  <button
-                    onClick={handleNextQuestion}
-                    disabled={!isCurrentAnswered}
-                    className={`px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed ${themeStyles.btnActive}`}
-                  >
-                    {currentIndex < questions.length - 1 ? (
-                      <>
-                        <span>進入下一題 (第 {currentIndex + 2} / 15 題)</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </>
-                    ) : (
-                      <>
-                        <span>完成全部 15 題！查看診斷報告</span>
-                        <Award className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs text-slate-400 hidden sm:block">
+                      {isCurrentAnswered ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          ✓ 本題已完成
+                        </span>
+                      ) : (
+                        <span>點選選項作答，答完即解鎖全解析與下一題</span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={handleNextQuestion}
+                      disabled={!isCurrentAnswered}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${themeStyles.btnActive}`}
+                    >
+                      {currentIndex < questions.length - 1 ? (
+                        <>
+                          <span>進入下一題 (第 {currentIndex + 2} / 15 題)</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </>
+                      ) : (
+                        <>
+                          <span>完成全部 15 題！查看診斷報告</span>
+                          <Award className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -971,6 +1056,17 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                     </div>
 
                     <div className="flex items-center gap-3">
+                      {isAnswered && (
+                        <button
+                          onClick={() => handleResetCurrentQuestion(q.id)}
+                          className="text-xs text-slate-400 hover:text-sky-600 flex items-center gap-1 transition-colors"
+                          title="重置此題作答紀錄"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>重新作答</span>
+                        </button>
+                      )}
+
                       <button
                         onClick={() =>
                           onAddErrorItem({
@@ -992,12 +1088,12 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                     </div>
                   </div>
 
-                  {/* 10-Minute Difficult Hint Box */}
+                  {/* Question Hint Box */}
                   {q.hint && (
                     <div className="p-3.5 rounded-lg border border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/30 text-xs">
                       <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 mb-1">
                         <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span>💡 難題思維提示：</span>
+                        <span>💡 名師解題提示：</span>
                       </div>
                       <p className="text-amber-900 dark:text-amber-300 font-serif-tc leading-relaxed pl-5">
                         {q.hint}
@@ -1009,6 +1105,11 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                   <div className="text-sm font-medium text-slate-900 dark:text-white leading-relaxed font-serif-tc whitespace-pre-line">
                     {q.question}
                   </div>
+
+                  {/* Math Problem Illustration Diagram (例圖) */}
+                  {q.subject === 'math' && (
+                    <MathQuestionDiagram questionId={q.id} />
+                  )}
 
                   {/* 4 Interactive Options */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1032,7 +1133,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                           key={optIdx}
                           disabled={isAnswered}
                           onClick={() => handleSelectOption(q.id, optIdx)}
-                          className={`p-3.5 text-left rounded-lg border text-xs transition-colors flex items-center justify-between font-mono leading-relaxed ${optStyle}`}
+                          className={`p-3.5 text-left rounded-lg border text-xs transition-colors flex items-center justify-between font-mono leading-relaxed cursor-pointer disabled:cursor-default ${optStyle}`}
                         >
                           <span>{option}</span>
                           {isAnswered && optIdx === q.correctIndex && (
@@ -1057,7 +1158,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                       onClick={() =>
                         setExpandedSolutions((prev) => ({ ...prev, [q.id]: !prev[q.id] }))
                       }
-                      className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 cursor-pointer"
                     >
                       <span>{isExpanded ? '收起名師全解析' : '💡 展開名師全步驟詳解'}</span>
                       {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
