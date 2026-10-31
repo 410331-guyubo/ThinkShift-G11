@@ -1,11 +1,81 @@
-<div align="center">
+# TrioBoost-Grade11 (智學三絕 · 高二語數英提分衝刺系統)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+> 專為 108 課綱高中二年級（高二）學生量身打造的**語文（國文）、數學（數A/數B）、英語**三科全方位提分與實戰測驗平台。
 
-  <h1>Built with AI Studio</h2>
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+---
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## 📖 專案簡介 (About)
 
-</div>
+**智學三絕 (TrioBoost)** 聚焦於高二升學測關鍵階段，打破死記硬背的傳統刷題模式，將**國文、數學、英文**三科分設為獨立專業面板，提供符合大考素養導向的**15題逐題計時實戰測驗**、名師步驟全解析、高頻失分陷阱透析與個人智慧錯題本。
+
+---
+
+## ✨ 核心特色與功能 (Key Features)
+
+### 1. ⏱️ 15 題單題計時實戰（一題一題出現，答完解鎖下一題）
+- **單題沉浸體驗**：每次僅展示一題，作答完畢立即判定正誤並展開解析，答完上一題才能點擊進入下一題。
+- **嚴格限時機制**：
+  - **高二數學 (數A/數B)**：每題限時 5～10 分鐘。針對 10 分鐘大考頂標難題，內建「💡 難題名師思維提示」摺疊按鈕，助學生打破思考盲區。
+  - **高二語文 (國文)**：每題限時 3 分鐘，培養大考文言文與素養題快速審題能力。
+  - **高二英語**：每題限時 3 分鐘，強化克漏字、文意選填與篇章結構之語感與語速。
+- **45 題題庫全數獨立**：國、數、英各 15 題，題目完全不重複，緊扣高二段考與學測高頻考點。
+
+### 2. 📝 深度四維名師解析庫
+每一題皆提供業界級超完整解析結構：
+- 🎯 **核心考點與概念**：精準定位 108 課綱知識節點。
+- 📝 **審題思路與步驟推導**：詳細步驟條理分明，公式與代數運算清晰呈現。
+- ⚠️ **高二學生最常失分地雷**：指出易混淆盲點、正負號陷阱與語法誤區。
+- ⚡ **考場秒殺技巧與直觀判斷**：傳授代特值、圖形直觀法、首尾對稱等大考快速破題手法。
+
+### 3. 📊 15 題段考實戰診斷成績單
+- 測驗完成後即時輸出量化報表：答對題數、得分率、總測驗耗時與預估學測級距（頂標／前標／均標）。
+- **一鍵收錄錯題**：自動將錯題同步至「個人錯題本」，支援掌握標記與自訂筆記。
+
+### 4. 🛠️ 三科專屬提分工具箱
+- **國文**：大考古文十五篇名句斷句拆解、文言虛詞透析、大考作文急救與評分潤飾室。
+- **數學**：AI 逆向步驟解題機、二階行列式與三角函數動態視覺化直觀實驗室。
+- **英文**：7000 字字彙搭配詞網路、克漏字與文意選填技巧、長難句文法手術台。
+- **總體**：段考/學測倒數計時看板、每日提分微衝刺、每週讀書規劃。
+
+---
+
+## 🚀 快速啟動 (Quick Start)
+
+### 1. 安裝相依套件
+```bash
+npm install
+```
+
+### 2. 設定環境變數
+將 `.env.example` 複製為 `.env`：
+```bash
+cp .env.example .env
+```
+（可選擇性填入 `GEMINI_API_KEY` 以啟用 AI 考題即時生成與作文診斷功能，未填入亦內建完整離線預設題庫）
+
+### 3. 本地啟動開發伺服器
+```bash
+npm run dev
+```
+瀏覽器造訪：`http://localhost:3000`
+
+### 4. 建置正式生產版本
+```bash
+npm run build
+```
+
+---
+
+## 🛠️ 技術棧 (Tech Stack)
+
+- **前端框架**：React 19 + TypeScript
+- **樣式庫**：Tailwind CSS v4
+- **建置工具**：Vite 8
+- **後端支援**：Node.js + Express (TSX 運行)
+- **圖示庫**：Lucide React
+- **動態效果**：Motion
