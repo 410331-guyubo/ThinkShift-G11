@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { SubjectKey, DailySprintTask, ErrorBookItem } from '../types';
 import confetti from 'canvas-confetti';
+import heroImg from '../assets/images/hero_study_booster_1793412112725.jpg';
+import chineseImg from '../assets/images/subject_chinese_art_1793412112955.jpg';
+import mathImg from '../assets/images/subject_math_geometry_1793412114372.jpg';
+import englishImg from '../assets/images/subject_english_mastery_1793412113865.jpg';
 import {
   Sparkles,
   ArrowRight,
@@ -130,7 +134,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Right Column (5 cols): High Fidelity Generated Hero Image */}
         <div className="lg:col-span-5 h-72 sm:h-80 lg:h-full min-h-[300px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative bg-slate-100 dark:bg-slate-900">
           <img
-            src="/src/assets/images/hero_study_booster_1793412112725.jpg"
+            src={heroImg}
             alt="智學三絕學習研討書齋"
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
@@ -141,6 +145,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Featured Banner: 智學三絕專區 */}
+      <div
+        onClick={() => onNavigate('mastery')}
+        className="cursor-pointer group p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-sky-500/15 to-emerald-500/15 border border-amber-300/40 dark:border-indigo-500/30 hover:border-indigo-500/60 dark:hover:border-indigo-400/60 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs hover:shadow-md"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
+            絕
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">
+                全新專區
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors font-display">
+                智學三絕 · 語數英大考破題秘笈殿堂
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              古文思辨脈絡、向量幾何投影秒殺、大考倒裝與高頻搭配詞 · 三絕心法速成與限時試煉
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform shrink-0">
+          <span>進入研讀三絕</span>
+          <ArrowRight className="w-4 h-4" />
+        </div>
+      </div>
 
       {/* SECTION 2: THREE-SUBJECT GATEWAY CARDS (Bento Style) */}
       <section className="space-y-4">
@@ -166,7 +200,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             <div className="h-44 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
               <img
-                src="/src/assets/images/subject_chinese_art_1793412112955.jpg"
+                src={chineseImg}
                 alt="國文古文與文學藝術"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -200,7 +234,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             <div className="h-44 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
               <img
-                src="/src/assets/images/subject_math_geometry_1793412114372.jpg"
+                src={mathImg}
                 alt="數學幾何與函數微積分"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -234,7 +268,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             <div className="h-44 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
               <img
-                src="/src/assets/images/subject_english_mastery_1793412113865.jpg"
+                src={englishImg}
                 alt="英語語言學與經典文學"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

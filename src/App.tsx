@@ -12,6 +12,7 @@ import { ChineseModule } from './components/ChineseModule';
 import { MathModule } from './components/MathModule';
 import { EnglishModule } from './components/EnglishModule';
 import { StudyPlanModule } from './components/StudyPlanModule';
+import { TriMasteryPage } from './components/TriMasteryPage';
 import { ErrorBookModal } from './components/ErrorBookModal';
 import { BookOpen, Compass, Languages, Target, Sparkles, CheckCircle2 } from 'lucide-react';
 
@@ -173,6 +174,13 @@ export default function App() {
           />
         )}
 
+        {currentTab === 'mastery' && (
+          <TriMasteryPage
+            onNavigate={setCurrentTab}
+            onAddErrorItem={handleAddErrorItem}
+          />
+        )}
+
         {currentTab === 'chinese' && (
           <div className="space-y-6">
             <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -249,6 +257,12 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-6">
+            <button
+              onClick={() => setCurrentTab('mastery')}
+              className="hover:text-slate-900 dark:hover:text-white transition-colors font-semibold text-indigo-600 dark:text-indigo-400"
+            >
+              智學三絕
+            </button>
             <button
               onClick={() => setCurrentTab('chinese')}
               className="hover:text-slate-900 dark:hover:text-white transition-colors"

@@ -1,4 +1,4 @@
-export type SubjectKey = 'dashboard' | 'chinese' | 'math' | 'english' | 'plan';
+export type SubjectKey = 'dashboard' | 'mastery' | 'chinese' | 'math' | 'english' | 'plan';
 
 export interface DailySprintTask {
   id: string;

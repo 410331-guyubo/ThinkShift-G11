@@ -23,6 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const navItems: { key: SubjectKey; label: string }[] = [
     { key: 'dashboard', label: '提分儀表板' },
+    { key: 'mastery', label: '智學三絕' },
     { key: 'chinese', label: '高二國文' },
     { key: 'math', label: '高二數學' },
     { key: 'english', label: '高二英文' },
