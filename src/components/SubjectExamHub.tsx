@@ -25,6 +25,7 @@ import {
   ListChecks,
 } from 'lucide-react';
 import { MathQuestionDiagram } from './MathQuestionDiagram';
+import { clientGenerateQuiz } from '../utils/aiFallback';
 
 interface SubjectExamHubProps {
   subject: 'chinese' | 'math' | 'english';
@@ -257,18 +258,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
     setAiGenMessage(null);
 
     try {
-      const res = await fetch('/api/ai/generate-quiz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject,
-          topic: aiCustomTopic,
-          difficulty: 'intermediate',
-          count: 2,
-        }),
-      });
-      if (!res.ok) throw new Error('無法生成新試題');
-      const data = await res.json();
+      const data = await clientGenerateQuiz(subject, aiCustomTopic, 'intermediate', 2);
 
       if (Array.isArray(data) && data.length > 0) {
         const formatted: Grade11ExamQuestion[] = data.map((item, idx) => ({
@@ -588,7 +578,7 @@ export const SubjectExamHub: React.FC<SubjectExamHubProps> = ({
                 </div>
 
                 {/* 15 Question Steps Indicator Track */}
-                <div className="grid grid-cols-15 gap-1 pt-1">
+                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-15 gap-1.5 pt-1">
                   {questions.map((q, idx) => {
                     const isAnswered = userSelections[q.id] !== undefined;
                     const isCorrect = userSelections[q.id] === q.correctIndex;

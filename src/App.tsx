@@ -116,6 +116,14 @@ export default function App() {
   };
 
   const handleAddErrorItem = (item: Omit<ErrorBookItem, 'id' | 'timestamp' | 'mastered'>) => {
+    const exists = errorBookItems.some(
+      (existing) => existing.question.trim() === item.question.trim()
+    );
+    if (exists) {
+      setShowToast('此題已在錯題本中，無需重複收錄！');
+      setTimeout(() => setShowToast(null), 3000);
+      return;
+    }
     const newItem: ErrorBookItem = {
       ...item,
       id: `err-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -124,6 +132,12 @@ export default function App() {
     };
     setErrorBookItems((prev) => [newItem, ...prev]);
     setShowToast('已成功收錄至個人錯題本！');
+    setTimeout(() => setShowToast(null), 3000);
+  };
+
+  const handleClearMastered = () => {
+    setErrorBookItems((prev) => prev.filter((item) => !item.mastered));
+    setShowToast('已清除所有標記為掌握的題目！');
     setTimeout(() => setShowToast(null), 3000);
   };
 
@@ -245,6 +259,7 @@ export default function App() {
         onToggleMastered={handleToggleMastered}
         onDeleteItem={handleDeleteErrorItem}
         onUpdateNote={handleUpdateErrorNote}
+        onClearMastered={handleClearMastered}
       />
 
       {/* Footer conforming strictly to anti-slop rules */}

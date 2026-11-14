@@ -3,6 +3,7 @@ import { ChineseSentenceDissect, EssayCritiqueResponse, ErrorBookItem } from '..
 import { PRESET_CHINESE_PASSAGES } from '../data/presetData';
 import { GRADE_11_UNITS, GRADE_11_EXAM_QUESTIONS } from '../data/grade11ExamData';
 import { SubjectExamHub } from './SubjectExamHub';
+import { clientDissectSentence, clientCritiqueEssay } from '../utils/aiFallback';
 import { BookOpen, Sparkles, Feather, CheckCircle, ArrowRight, BookmarkPlus, Loader2, AlertCircle } from 'lucide-react';
 
 interface ChineseModuleProps {
@@ -36,13 +37,7 @@ export const ChineseModule: React.FC<ChineseModuleProps> = ({ onAddErrorItem }) 
     setDissectError(null);
 
     try {
-      const res = await fetch('/api/ai/dissect-sentence', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input, type: 'chinese_classical' }),
-      });
-      if (!res.ok) throw new Error('拆解服務異常');
-      const data = await res.json();
+      const data = (await clientDissectSentence(input, 'chinese_classical')) as ChineseSentenceDissect;
       setDissectResult(data);
     } catch (err: any) {
       setDissectError(err.message || '無法取得文言解析');
@@ -58,13 +53,7 @@ export const ChineseModule: React.FC<ChineseModuleProps> = ({ onAddErrorItem }) 
     setCritiqueError(null);
 
     try {
-      const res = await fetch('/api/ai/critique-essay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: essayText, subject: 'chinese', topic: essayTopic, targetBand }),
-      });
-      if (!res.ok) throw new Error('批改服務異常');
-      const data = await res.json();
+      const data = await clientCritiqueEssay(essayText, 'chinese', essayTopic, targetBand);
       setEssayResult(data);
     } catch (err: any) {
       setCritiqueError(err.message || '批改服務暫時不可用');

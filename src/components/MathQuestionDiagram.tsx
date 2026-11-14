@@ -381,8 +381,8 @@ export const MathQuestionDiagram: React.FC<MathQuestionDiagramProps> = ({ questi
             <span>🔢 二階反矩陣變形公式對照例圖</span>
           </div>
           <svg viewBox="0 0 320 90" className="w-full max-w-[280px] h-auto overflow-visible">
-            <rect x="10" y="15" width="300" height="60" rx="8" fill="#f8fafc" stroke="#64748b" strokeWidth="1.5" />
-            <text x="25" y="38" fill="#0f172a" fontSize="11" fontWeight="bold">
+            <rect x="10" y="15" width="300" height="60" rx="8" fill="rgba(14, 165, 233, 0.08)" stroke="#64748b" strokeWidth="1.5" />
+            <text x="25" y="38" fill="#0f172a" className="dark:fill-white font-bold" fontSize="11" fontWeight="bold">
               det(A) = 3·2 - 2·1 = 4 ≠ 0
             </text>
             <text x="25" y="60" fill="#0284c7" fontSize="11" fontWeight="bold">

@@ -17,6 +17,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Initialize Gemini SDK with User-Agent header
 const apiKey = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const ai = apiKey
   ? new GoogleGenAI({
       apiKey,
@@ -285,7 +286,7 @@ app.post('/api/ai/solve-math', async (req, res) => {
 請以繁體中文與正體數學式輸出，並嚴格遵循指定的 JSON 格式。`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -367,7 +368,7 @@ ${text}
 提供句型升級對比（挑選原文中最平淡或有語病的2~3句，重塑為滿分水準典範句型），並給出具體可落實的改進建議。繁體中文回覆。`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -443,7 +444,7 @@ app.post('/api/ai/dissect-sentence', async (req, res) => {
 包含：主詞(Main Subject)、主要動詞(Main Verb)、主要受詞/補語(Main Object/Complement)、子句層次拆解、重點文法考點、流暢道地中文翻譯、核心單字與片語搭配。請嚴格遵守 JSON。`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -536,7 +537,7 @@ app.post('/api/ai/generate-quiz', async (req, res) => {
 請使用繁體中文輸出。`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -602,7 +603,7 @@ app.post('/api/ai/diagnose-plan', async (req, res) => {
 包含：現狀總評、各科突破聚焦策略、一週循環日程安排、提分心法。請繁體中文輸出符合 JSON 格式。`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: 'application/json',

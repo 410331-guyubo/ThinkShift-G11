@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ErrorBookItem } from '../types';
-import { BookX, CheckCircle, Trash2, X, Filter, CheckCircle2, BookmarkCheck } from 'lucide-react';
+import { BookX, CheckCircle, Trash2, X, Filter, CheckCircle2, BookmarkCheck, Copy, Check } from 'lucide-react';
 
 interface ErrorBookModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface ErrorBookModalProps {
   onToggleMastered: (id: string) => void;
   onDeleteItem: (id: string) => void;
   onUpdateNote: (id: string, note: string) => void;
+  onClearMastered?: () => void;
 }
 
 export const ErrorBookModal: React.FC<ErrorBookModalProps> = ({
@@ -18,9 +19,11 @@ export const ErrorBookModal: React.FC<ErrorBookModalProps> = ({
   onToggleMastered,
   onDeleteItem,
   onUpdateNote,
+  onClearMastered,
 }) => {
   const [filterSubject, setFilterSubject] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [copied, setCopied] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -37,6 +40,28 @@ export const ErrorBookModal: React.FC<ErrorBookModalProps> = ({
     chinese: '國文',
     math: '數學',
     english: '英文',
+  };
+
+  const handleCopyNotes = () => {
+    if (filteredItems.length === 0) return;
+    const text = filteredItems
+      .map(
+        (item, idx) =>
+          `### [錯題 ${idx + 1}] [${subjectLabels[item.subject]}] ${item.topic}\n` +
+          `**題目**：${item.question}\n` +
+          `- **原先錯誤**：${item.wrongAnswer}\n` +
+          `- **正確解答**：${item.correctAnswer}\n` +
+          `- **失分歸因**：${item.reason}\n` +
+          (item.note ? `- **避坑筆記**：${item.note}\n` : '') +
+          `\n`
+      )
+      .join('\n---\n\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
@@ -120,6 +145,42 @@ export const ErrorBookModal: React.FC<ErrorBookModalProps> = ({
             >
               已掌握
             </button>
+          </div>
+        </div>
+
+        {/* Action Toolbar: Copy & Clear Mastered */}
+        <div className="px-5 py-2.5 bg-slate-100/60 dark:bg-slate-800/30 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="text-slate-500">
+            顯示 {filteredItems.length} 題
+            {items.some((i) => i.mastered) && (
+              <span className="ml-2 text-emerald-600 dark:text-emerald-400 font-medium">
+                (已掌握 {items.filter((i) => i.mastered).length} 題)
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {filteredItems.length > 0 && (
+              <button
+                onClick={handleCopyNotes}
+                className="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="複製當前篩選之所有題目與筆記為 Markdown 格式"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? '已複製到剪貼簿！' : '複製錯題筆記'}</span>
+              </button>
+            )}
+
+            {onClearMastered && items.some((i) => i.mastered) && (
+              <button
+                onClick={onClearMastered}
+                className="px-2.5 py-1 rounded-md text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors flex items-center gap-1 cursor-pointer"
+                title="清除所有已標記為掌握的題目"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>清除已掌握題目</span>
+              </button>
+            )}
           </div>
         </div>
 

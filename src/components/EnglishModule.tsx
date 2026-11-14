@@ -3,6 +3,7 @@ import { EnglishSentenceDissect, ErrorBookItem } from '../types';
 import { PRESET_ENGLISH_VOCAB, PRESET_ENGLISH_SENTENCES, EnglishVocabCard } from '../data/presetData';
 import { GRADE_11_UNITS, GRADE_11_EXAM_QUESTIONS } from '../data/grade11ExamData';
 import { SubjectExamHub } from './SubjectExamHub';
+import { clientDissectSentence } from '../utils/aiFallback';
 import { Volume2, Sparkles, Languages, Search, BookmarkPlus, Loader2, CheckCircle, BookOpen, AlertCircle } from 'lucide-react';
 
 interface EnglishModuleProps {
@@ -41,13 +42,7 @@ export const EnglishModule: React.FC<EnglishModuleProps> = ({ onAddErrorItem }) 
     setSyntaxError(null);
 
     try {
-      const res = await fetch('/api/ai/dissect-sentence', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input, type: 'english_grammar' }),
-      });
-      if (!res.ok) throw new Error('長難句剖析失敗');
-      const data = await res.json();
+      const data = (await clientDissectSentence(input, 'english_grammar')) as EnglishSentenceDissect;
       setSyntaxResult(data);
     } catch (err: any) {
       setSyntaxError(err.message || '文法手術台暫時不可用');

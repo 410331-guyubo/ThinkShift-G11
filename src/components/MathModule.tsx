@@ -4,6 +4,7 @@ import { PRESET_MATH_PROBLEMS } from '../data/presetData';
 import { GRADE_11_UNITS, GRADE_11_EXAM_QUESTIONS } from '../data/grade11ExamData';
 import { SubjectExamHub } from './SubjectExamHub';
 import { MathVisualizer } from './MathVisualizer';
+import { clientSolveMath } from '../utils/aiFallback';
 import { Compass, Sparkles, AlertTriangle, Lightbulb, BookmarkPlus, Loader2, ArrowRight, CheckCircle, HelpCircle } from 'lucide-react';
 
 interface MathModuleProps {
@@ -31,13 +32,7 @@ export const MathModule: React.FC<MathModuleProps> = ({ onAddErrorItem }) => {
     setShowSimilarAnswer(false);
 
     try {
-      const res = await fetch('/api/ai/solve-math', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problem: input, gradeLevel, studentAttempt }),
-      });
-      if (!res.ok) throw new Error('數學求解服務異常');
-      const data = await res.json();
+      const data = await clientSolveMath(input, gradeLevel, studentAttempt);
       setSolveResult(data);
     } catch (err: any) {
       setSolveError(err.message || '解題剖析暫時無法回應');

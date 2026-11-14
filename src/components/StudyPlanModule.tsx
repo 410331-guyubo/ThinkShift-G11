@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DiagnosticPlanResponse } from '../types';
+import { clientDiagnosePlan } from '../utils/aiFallback';
 import { Target, Sparkles, Calendar, TrendingUp, CheckCircle, Clock, BookOpen, Loader2, Award } from 'lucide-react';
 
 export const StudyPlanModule: React.FC = () => {
@@ -21,20 +22,14 @@ export const StudyPlanModule: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/ai/diagnose-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chineseGrade,
-          mathGrade,
-          englishGrade,
-          targetGoal,
-          hoursPerDay,
-          mainStruggles,
-        }),
+      const data = await clientDiagnosePlan({
+        chineseGrade,
+        mathGrade,
+        englishGrade,
+        targetGoal,
+        hoursPerDay,
+        mainStruggles,
       });
-      if (!res.ok) throw new Error('提分診斷服務異常');
-      const data = await res.json();
       setPlanResult(data);
     } catch (err: any) {
       setErrorMsg(err.message || '無法取得診斷報告');
