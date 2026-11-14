@@ -8,7 +8,7 @@ const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig(() => {
   return {
-    base: './',
+    base: '/ThinkShift-G11/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
